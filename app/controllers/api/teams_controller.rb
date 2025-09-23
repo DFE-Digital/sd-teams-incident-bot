@@ -1,5 +1,4 @@
 class Api::TeamsController < ApplicationController
-  skip_before_action :verify_authenticity_token
 
   def messages
     @bot_activity_type = request.request_parameters["type"] rescue nil
@@ -14,7 +13,7 @@ class Api::TeamsController < ApplicationController
     case activity["type"]
     when "message"
       render json: handle_message(activity)
-    when "invoke" # Adaptive Card Action.Submit
+    when "invoke"
       render json: handle_invoke(activity)
     else
       render json: {}, status: :ok
@@ -42,14 +41,11 @@ class Api::TeamsController < ApplicationController
 
     case data["action"]
     when "create_incident"
-      # TODO: persist to DB (Incident.create!(...))
       BotResponder.text_reply(act, "✅ Incident created: #{data["title"]}")
     else
       BotResponder.text_reply(act, "Unsupported action.")
     end
   end
-
-  # --- Card builders ---
 
   def create_incident_card
     {
